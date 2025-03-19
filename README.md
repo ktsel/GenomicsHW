@@ -45,7 +45,7 @@ We are going to check quality of our raw reads, inspecting charachteristics and 
 
 `fastqc raw_data/*fastq.gz -o QC`
 
-![alt text](<Screenshot 2025-03-18 132229.png>)
+
 
 2. Removing low quality base calls can improve downstream steps of the analysis. There are long list of different tolls, we ve choose [trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) (v0.39).
 
@@ -79,7 +79,7 @@ Input Read Pairs: 455876 Both Surviving: **376340** (82.55%) Forward Only Surviv
 
 `fastqc QC_T_30/*P -o QC_T_30/`
 
-![alt text](<Screenshot 2025-03-19 152315.png>)
+
 - Initial Raw Reads (amp_res_1_fastqc)
 
 Per Base Sequence Quality: Failed, indicating low-quality scores at some positions. Generally, quality scores decrease towards the end of reads​.
@@ -370,11 +370,31 @@ Since SnpEff was installed via conda, there is no package to parse it, but it sh
 
 `SnpSift extractFields VarScan_results_annotated.vcf ANN > extracted_ann.tsv`
 
-![alt text](<Screenshot 2025-03-19 135218.png>)
+`head extracted_ann.tsv `
 
-We want to split each annotation into separate lines and add headers, so we can use the Python script (parse_ann.py), to run it:
+```
+ANN
+G|missense_variant|MODERATE|ftsI|b0084|transcript|b0084|protein_coding|1/1|c.1631C>G|p.Ala544Gly|1631/1767|1631/1767|544/588||,G|upstream_gene_variant|MODIFIER|murE|b0085|transcript|b0085|protein_coding||c.-123C>G|||||123|WARNING_TRANSCRIPT_NO_START_CODON,G|upstream_gene_variant|MODIFIER|murF|b0086|transcript|b0086|protein_coding||c.-1607C>G|||||1607|,G|upstream_gene_variant|MODIFIER|mraY|b0087|transcript|b0087|protein_coding||c.-2959C>G|||||2959|,G|upstream_gene_variant|MODIFIER|murD|b0088|transcript|b0088|protein_coding||c.-4044C>G|||||4044|,G|downstream_gene_variant|MODIFIER|cra|b0080|transcript|b0080|protein_coding||c.*4011C>G|||||4011|WARNING_TRANSCRIPT_NO_START_CODON,G|downstream_gene_variant|MODIFIER|mraZ|b0081|transcript|b0081|protein_coding||c.*2951C>G|||||2951|,G|downstream_gene_variant|MODIFIER|rsmH|b0082|transcript|b0082|protein_coding||c.*2008C>G|||||2008|,G|downstream_gene_variant|MODIFIER|ftsL|b0083|transcript|b0083|protein_coding||c.*1646C>G|||||1646|
+A|missense_variant|MODERATE|acrB|b0462|transcript|b0462|protein_coding|1/1|c.1706A>T|p.Gln569Leu|1706/3150|1706/3150|569/1049||,A|upstream_gene_variant|MODIFIER|pdeB|b0457|transcript|b0457|protein_coding||c.-4081A>T|||||4081|WARNING_TRANSCRIPT_NO_START_CODON,A|upstream_gene_variant|MODIFIER|ylaC|b0458|transcript|b0458|protein_coding||c.-3447A>T|||||3447|,A|upstream_gene_variant|MODIFIER|maa|b0459|transcript|b0459|protein_coding||c.-2780A>T|||||2780|,A|upstream_gene_variant|MODIFIER|hha|b0460|transcript|b0460|protein_coding||c.-2390A>T|||||2390|,A|upstream_gene_variant|MODIFIER|tomB|b0461|transcript|b0461|protein_coding||c.-1990A>T|||||1990|,A|upstream_gene_variant|MODIFIER|acrR|b0464|transcript|b0464|protein_coding||c.-3063T>A|||||3063|,A|upstream_gene_variant|MODIFIER|mscK|b0465|transcript|b0465|protein_coding||c.-3838T>A|||||3838|,A|downstream_gene_variant|MODIFIER|acrA|b0463|transcript|b0463|protein_coding||c.*1728A>T|||||1728|
+```
+
+
+We want to split each annotation into separate lines and add headers, so we can use the Python script [parse_ann.py](parse_ann.py), to run it:
 
 `python parse_ann.py snpeff/extracted_ann.tsv parsed_ann.tsv`
 
 now we have human-readable tsv:
-![alt text](<Screenshot 2025-03-19 135611.png>)
+`head parsed_ann.tsv `
+
+```
+Allele  Annotation      Annotation_Impact       Gene_Name       Gene_ID Feature_Type    Feature_ID      Transcript_BioType      Rank    HGVS.c  HGVS.p  cDNA.pos / cDNA.length  CDS.pos / CDS.length    AA.pos / AA.length      Distance     ERRORS / WARNINGS / INFO
+G       missense_variant        MODERATE        ftsI    b0084   transcript      b0084   protein_coding  1/1     c.1631C>G       p.Ala544Gly     1631/1767       1631/1767       544/588
+G       upstream_gene_variant   MODIFIER        murE    b0085   transcript      b0085   protein_coding          c.-123C>G                                       123     WARNING_TRANSCRIPT_NO_START_CODON
+G       upstream_gene_variant   MODIFIER        murF    b0086   transcript      b0086   protein_coding          c.-1607C>G                                      1607
+G       upstream_gene_variant   MODIFIER        mraY    b0087   transcript      b0087   protein_coding          c.-2959C>G                                      2959
+G       upstream_gene_variant   MODIFIER        murD    b0088   transcript      b0088   protein_coding          c.-4044C>G                                      4044
+G       downstream_gene_variant MODIFIER        cra     b0080   transcript      b0080   protein_coding          c.*4011C>G                                      4011    WARNING_TRANSCRIPT_NO_START_CODON
+G       downstream_gene_variant MODIFIER        mraZ    b0081   transcript      b0081   protein_coding          c.*2951C>G                                      2951
+G       downstream_gene_variant MODIFIER        rsmH    b0082   transcript      b0082   protein_coding          c.*2008C>G                                      2008
+G       downstream_gene_variant MODIFIER        ftsL    b0083   transcript      b0083   protein_coding          c.*1646C>G                                      1646
+```
