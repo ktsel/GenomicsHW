@@ -1,0 +1,8 @@
+{
+    "global_params": {"outdir": "./output", "threads": 8},
+    "quast": {"outdir": "./output"},
+    "samtools": {"prefix": "faidx", "contig_name": "NODE_1_length_29907_cov_150.822528"},
+    "blast": {"db": "nt", "entrez_query": "1900/01/01:2020/01/01[PDAT] AND viruses[ORGN]", "format7": "7 qseqid sseqid pident evalue bitscore"},
+    "prokka": {"outdir": "./output"}
+ }
+ 

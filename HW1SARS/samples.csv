@@ -1,0 +1,2 @@
+sample_id,read_1,read_2,assembly
+SRR10971381_assembly,-,-,./input/spades_scaffolds.fasta

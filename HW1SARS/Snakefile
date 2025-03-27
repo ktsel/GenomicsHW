@@ -1,0 +1,141 @@
+import os
+import csv
+import json
+
+
+# Абсолютные пути для работы пайплайна
+hw_dir = os.path.abspath(".")
+test_input_dir = os.path.abspath("./input")
+
+# Читаем параметры из params.json
+with open("params.json", "r") as f:
+    params = json.load(f)
+
+# Абсолютный путь к директории вывода из params.json
+test_output_dir = os.path.abspath(params["global_params"]["outdir"])
+
+# Создаем словарь для хранения информации о каждом уникальном sample_id
+samples = {}
+unique_sample_ids = set()
+
+"""
+Дальнейщий код создан на случай, если у нас имееются прочтения прямые и обратные в файле csv, было принято решение оставить эту часть
+! ВАЖНЫЙ момент - питоновкая обработка осталось прежней, но некотрые rule (fastqc, spades) были удалены, 
+также input в остальных rule изменен (не учитываются сырые данные, только сборка)
+"""
+# Первый проход - собираем все уникальные sample_id и их read файлы 
+with open(os.path.join(hw_dir, "samples.csv"), "r") as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        base_sample_id = row["sample_id"].replace("_assembly", "")
+        unique_sample_ids.add(base_sample_id)
+        
+        # Если это первая встреча sample_id или его версии с _assembly
+        if base_sample_id not in samples:
+            samples[base_sample_id] = {
+                "read_1": os.path.abspath(row.get("read_1", "")),
+                "read_2": os.path.abspath(row.get("read_2", "")),
+                "assembly": ""
+            }
+        
+        # Если есть assembly, добавляем его (даже если это в строке с _assembly)
+        if row.get("assembly"):
+            samples[base_sample_id]["assembly"] = os.path.abspath(row["assembly"])
+
+# Создаем списки образцов с assembly и без него
+samples_with_assembly = []
+samples_without_assembly = []
+
+# Распределяем образцы по спискам
+for sample_id in unique_sample_ids:
+    if samples[sample_id]["assembly"]:
+        samples_with_assembly.append(sample_id)
+    else:
+        samples_without_assembly.append(sample_id)
+
+def get_final_output():
+    final_outputs = []
+    
+    # Для образцов с assembly
+    for sample in samples_with_assembly:
+        final_outputs.extend([
+            f"{test_output_dir}/{sample}_quast/report.html",  
+            f"{test_output_dir}/{sample}_prokka/PROKKA_03112025.tsv",
+            f"{test_output_dir}/{sample}_samtools/contig.fa"
+            #f"{test_output_dir}/{sample}_blast/blast_results.txt"
+        ])
+    
+    # Для образцов без assembly
+    for sample in samples_without_assembly:
+        final_outputs.extend([
+            f"{test_output_dir}/{sample}_fastqc/{sample}_1_fastqc.html",
+            f"{test_output_dir}/{sample}_fastqc/{sample}_2_fastqc.html",
+            f"{test_output_dir}/{sample}_spades/scaffolds.fasta",
+            f"{test_output_dir}/{sample}_quast/report.html",
+            f"{test_output_dir}/{sample}_prokka/annotation.txt"
+        ])
+    
+    return final_outputs
+
+rule all:
+    input:
+        get_final_output()
+
+
+# Правило quast - Оценка качества сборк
+rule quast:
+    input:
+        scaffolds=lambda wildcards: samples[wildcards.sample.replace("_assembly", "")]["assembly"]
+    conda: "./envs/quast.yaml"
+    output:
+        report=f"{test_output_dir}/{{sample}}_quast/report.html" #сохраняет всю директориюс кучей файлов, но нас интересует этот файл
+    params:
+        outdir=f"{test_output_dir}/{{sample}}_quast"
+    shell:
+        "quast.py {input.scaffolds} -o {params.outdir}"
+
+# Правило samtools - обрабатывем мультифасту, в данном куске мы уже знаем итересующий нас контиг(взят из аутпута ViralVerify), прописываем его в парамс 
+rule samtools:
+    input:
+        scaffolds=lambda wildcards: samples[wildcards.sample.replace("_assembly", "")]["assembly"]
+    conda: "./envs/samtools.yaml"
+    output:
+        annotation=f"{test_output_dir}/{{sample}}_samtools/contig.fa"
+    params: 
+        prefix=params["samtools"]["prefix"],
+        contig=params["samtools"]["contig_name"]
+    shell:
+        """
+        samtools {params.prefix} {input.scaffolds} && \
+        samtools {params.prefix} {input.scaffolds} {params.contig} > {output.annotation}
+        """
+#бласт не очень захотел создавать окружение через Snakemakeконду, но команда для bash рабочая, можно использовать ее, можно через web(я делала через веб)
+#blastn -remote -db nt -query contig.fa -entrez_query "1900/01/01:2020/01/01[PDAT] AND viruses[ORGN]" -out blast_results.txt
+""""
+rule blast:
+    input:
+        contig=lambda wildcards: f"{test_output_dir}/{wildcards.sample}_samtools/contig.fa"
+    conda: "./envs/blast.yaml"
+    output:
+        #blast_dir=directory(f"{test_output_dir}/{{sample}}_blast"),
+        blast=f"{test_output_dir}/{{sample}}_blast/blast_results.txt"
+    params: 
+        db=params["blast"]["db"],
+        data=params["blast"]["entrez_query"],
+        #format7=params["blast"]["format7"]
+    shell:
+        "blastn -remote -db {params.db} -query {input.contig} -entrez_query '{params.data}' -out {output.blast}"
+""""
+
+# Правило prokka  Аннотация генома который нас интересует
+rule prokka:
+    input:
+        contig=lambda wildcards: f"{test_output_dir}/{wildcards.sample}_samtools/contig.fa"
+    conda: "./envs/prokka.yaml"
+    output:
+        annotated_dir=directory(f"{test_output_dir}/{{sample}}_prokka"),
+        annotation=f"{test_output_dir}/{{sample}}_prokka/PROKKA_03112025.tsv"
+    
+    shell:
+        "prokka --outdir {output.annotated_dir} --force {input.contig}"
+
