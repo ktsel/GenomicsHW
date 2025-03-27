@@ -46,7 +46,7 @@ Checking what's inside of our file (head command):
 
  We can plot it in any tool, here is example using R:
 
-![alt text](Rplot01.png)
+![kmer freq distribution(raw)](<kmer freq distribution(raw).png>)
 
 `Peak:
   Frequency: 125
@@ -140,10 +140,10 @@ Repeat the k-mer profile plotting step with corrected reads from spades ouput. B
 
 `jellyfish histo -o kmer_cor_31.histo output_cor_k31.jf`
 
-![alt text](Rplot.png)
+![kmer freq distribution(corr)](<kmer freq distribution(corr).png>)
 
 `Peak:
-  Frequency: 125
+  Frequency: 124
   Count: 46189`
 
 ## Step 5.Three libraries quality asessment
@@ -241,7 +241,7 @@ Mauve, which visualizes an alignment as a series of conserved segments called Lo
 'Then: File” → “Align with progressiveMauve...”. Press “Add sequences” and select the reference genome, then the annotated E. coli X genome (“scaffolds.gbk” or “scaffolds.gbf”, depending on version), and start the alignment.
 After alignment we need to find our gene of interest (shiga toxin-related genes). go to the Sequence Navigator in Mauve (the icon of the binoculars in the upper line). Select “Product” in the left window and enter the name of the desired gene (or its function) in the right window.'
 
-![alt text](<Screenshot 2025-03-26 121640.png>)
+![alt text](<Mauve_stx.png>)
 
 stxB Shiga toxin subunit B, and longer one - stxA Shiga toxin subunit A.
 
