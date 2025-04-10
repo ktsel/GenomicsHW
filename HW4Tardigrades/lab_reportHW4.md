@@ -10,7 +10,7 @@ Tardigrades (*Ramazzottius varieornatus*) are microscopic extremophiles noted fo
 Tardigrades, also known as water bears, are renowned for their resilience against extreme environmental conditions, including intense radiation, dehydration, and high pressures. They are the first known animals capable of surviving exposure to outer space. Understanding the genomic basis of their stress tolerance, particularly mechanisms for efficient DNA repair, holds promise for advances in biotechnology and radiation protection.
 
  
-Recently, Boothby et al. (2015) [1] proposed extensive horizontal gene transfer (HGT) as a key mechanism underlying tardigrades’ remarkable stress resistance. However, Koutsovoulos et al. (2016) [2] subsequently refuted this claim, demonstrating minimal actual HGT and highlighting significant genomic contamination issues. Clarifying the exact genetic basis for tardigrade stress resistance thus remains critical, motivating us to investigate the genome of *Ramazzottius varieornatus* through rigorous bioinformatics approaches.
+Recently, Boothby et al. [1] proposed extensive horizontal gene transfer (HGT) as a key mechanism underlying tardigrades’ remarkable stress resistance. However, Koutsovoulos et al. [2] subsequently refuted this claim, demonstrating minimal actual HGT and highlighting significant genomic contamination issues. Clarifying the exact genetic basis for tardigrade stress resistance thus remains critical, motivating us to investigate the genome of *Ramazzottius varieornatus* through rigorous bioinformatics approaches.
 
 ---
 
@@ -35,9 +35,9 @@ Localization and Domain Analysis:
 
 BLAST Database Search:   
 
-BLAST searches yielded no significant matches for either protein, underscoring their novelty and possible tardigrade-specific functions. However, targeted BLAST analysis against available tardigrade genomic sequences (NCBI) confirmed strong tardigrade-specific matches:
-•	g4106.t1: Perfect match (E-value: 0) to the hypothetical protein RvY_04937 from *Ramazzottius varieornatus*, indicating species-specific evolution.
-•	g12510.t1: Highly significant matches (E-value ≤ 2e-149) to hypothetical proteins (RvY_14932 isoforms) in *Ramazzottius varieornatus*, strongly suggesting a conserved tardigrade-specific role.
+BLAST searches yielded no significant matches for either protein, underscoring their novelty and possible tardigrade-specific functions. However, targeted BLAST analysis against available tardigrade genomic sequences (NCBI) confirmed strong tardigrade-specific matches:    
+-	g4106.t1: Perfect match (E-value: 0) to the hypothetical protein RvY_04937 from *Ramazzottius varieornatus*, indicating species-specific evolution.     
+-	g12510.t1: Highly significant matches (E-value ≤ 2e-149) to hypothetical proteins (RvY_14932 isoforms) in *Ramazzottius varieornatus*, strongly suggesting a conserved tardigrade-specific role.
 
  There is also weak hit in the g4106.t1 with Sarcoplasmic reticulum histidine-rich calcium-binding protein (47% identity, E-value: 0.001).
  
@@ -67,8 +67,8 @@ Protein g4106.t1, localized predominantly to the endoplasmic reticulum (ER), pos
 Protein g12510.t1 is membrane-associated with a clear MARVEL domain and leucine zipper motif, indicative of roles in membrane integrity, signaling, or transcriptional regulation rather than direct DNA repair. This aligns with previous findings by Hashimoto et al. [5], where identified proteins directly bound DNA, suggesting multiple protective mechanisms might operate in parallel. 
 
 Future experimental validation is recommended:   
-•	For g4106.t1: Confirm nuclear localization and chromatin association under stress conditions via microscopy and ChIP assays.   
-•	For g12510.t1: Validate membrane localization and explore leucine zipper-mediated interactions and signaling roles using biochemical interaction assays and functional knockout studies.
+-	For g4106.t1: Confirm nuclear localization and chromatin association under stress conditions via microscopy and ChIP assays.
+-	For g12510.t1: Validate membrane localization and explore leucine zipper-mediated interactions and signaling roles using biochemical interaction assays and functional knockout studies. 
 
 
 ---
