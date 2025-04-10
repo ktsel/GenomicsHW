@@ -1,0 +1,17 @@
+#                                                                            --- full sequence --- -------------- this domain -------------   hmm coord   ali coord   env coord
+# target name        accession   tlen query name           accession   qlen   E-value  score  bias   #  of  c-Evalue  i-Evalue  score  bias  from    to  from    to  from    to  acc description of target
+#------------------- ---------- ----- -------------------- ---------- ----- --------- ------ ----- --- --- --------- --------- ------ ----- ----- ----- ----- ----- ----- ----- ---- ---------------------
+MARVEL               PF01284.28   135 g12510.t1            -            513   3.3e-07   30.8   6.0   1   4      0.93   2.2e+04   -4.2   0.1    12    23    80    91    76    93 0.64 Membrane-associating domain
+MARVEL               PF01284.28   135 g12510.t1            -            513   3.3e-07   30.8   6.0   2   4   1.4e-11   3.3e-07   30.8   6.0     4   135   147   295   144   295 0.88 Membrane-associating domain
+MARVEL               PF01284.28   135 g12510.t1            -            513   3.3e-07   30.8   6.0   3   4      0.17     4e+03   -1.8  14.6    17   101   323   466   321   500 0.60 Membrane-associating domain
+MARVEL               PF01284.28   135 g12510.t1            -            513   3.3e-07   30.8   6.0   4   4     0.072   1.7e+03   -0.7   0.1    80    99   487   506   481   510 0.63 Membrane-associating domain
+#
+# Program:         hmmscan
+# Version:         3.4 (Aug 2023)
+# Pipeline mode:   SCAN
+# Query file:      identified_proteins.fa
+# Target file:     Pfam-A.hmm
+# Option settings: hmmscan --domtblout pfam_domains.tsv --cpu 4 Pfam-A.hmm identified_proteins.fa 
+# Current dir:     /home/ktsel/HWGenomics/HW4/pfam
+# Date:            Tue Apr  8 16:33:04 2025
+# [ok]
