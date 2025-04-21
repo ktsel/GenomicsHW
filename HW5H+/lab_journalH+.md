@@ -2,7 +2,9 @@
 
 ## Step 1. Data download and preparing
 
-We will work with raw 23andMe data. “Fix your teacher”: my own data (yes, I decided to release it for class purposes) - 23andMe and Genotek. Our raw data looks like this for now:
+"We will work with raw 23andMe data. “Fix your teacher”: my own data (yes, I decided to release it for class purposes) - 23andMe and Genotek."
+
+ Our raw data looks like this for now:
 ```
 # rsid	chromosome	position	genotype
 rs12564807	1	734462	AA
@@ -33,7 +35,41 @@ MT      43      i4000964        C       .       .       .       PR      GT      
 MT      46      i4001177        T       .       .       .       PR      GT      0/0
 MT      49      i4000987        A       .       .       .       PR      GT      0/0
 ```
-The presence of chromosome Y sequences (contig ID=Y) in the VCF file explicitly confirms the biological sex as male.
+With the command below extract only lines with 'X' and looking for heterozygous SNPs (0/1 or 1/0).
+
+ Python [script](basic_info.ipynb) that thoroughly checks heterozygosity per chromosome from our VCF file. output:
+
+```
+            Heterozygous_Count  Total_SNPs  Heterozygosity_Percent
+Chromosome                                                        
+1                        13408       46440               28.871662
+10                        8769       29171               30.060677
+11                        7898       29040               27.196970
+12                        8206       28343               28.952475
+13                        6105       21189               28.812119
+14                        5406       18638               29.005258
+15                        4996       18058               27.666408
+16                        5336       19111               27.921093
+17                        4624       17956               25.751838
+18                        4985       16480               30.248786
+19                        3293       12994               25.342466
+2                        13480       45743               29.468990
+20                        4412       14486               30.456993
+21                        2440        8450               28.875740
+22                        2575        8972               28.700401
+3                        11231       38252               29.360556
+4                        10359       33852               30.600851
+5                        10398       34361               30.261052
+6                        11578       40180               28.815331
+7                         8787       32740               26.838729
+8                         8653       30233               28.621043
+9                         7596       26583               28.574653
+MT                           0        3286                0.000000
+X                          103       18759                0.549070
+Y                            0        2084                0.000000
+
+```
+We have very low heterozygosity for X chromosome (~0.55%), practically close to zero.Thus, the result (~0.55%) clearly and strongly indicates a male genome.
 
 ## Step 2.  Determine Ancestry and Haplogroups
 Determining maternal (mtDNA) Haplogroup using [James Lick mtDNA Haplogroup Analysis](https://dna.jameslick.com/mthap/).
@@ -101,20 +137,25 @@ Well, based on data it's complicated to be sure on 100% exact eye color. It's **
 
 ![alt text](eye_color.png)
 
-## Step 4. Clinical Annotation and SNP Exploration
+Another way of predicting eye0color is using [HIrisPlex-S Eye, Hair and Skin Colour DNA Phenotyping Webtool](https://hirisplex.erasmusmc.nl/)
+The result are presented in files: [IrisPlex.csv]() and [HIrisPlexS.csv]() 
+## Step 4. Clinical annotation and SNP exploration
+Clinical annotation involves linking genetic variants (SNPs from genome data) to their known medical significance or biological effects, particularly regarding diseases or clinical traits. SnpEff: annotates our SNPs with biological context (location in the gene, type of mutation, impact on protein). SnpSift: annotates with clinical data from databases such as ClinVar (clinical variants) or GWAS Catalog (Genome-Wide Association Studies). Below the row of command will perform clinical annotation.
 
+```
 java -jar ./snpEff.jar GRCh37.75 snps_clean.vcf > snps_snpeff.vcf
 wget https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar.vcf.gz
 sudo apt-get install tabix
 tabix -p vcf clinvar.vcf.gz
 java -jar SnpSift.jar annotate clinvar.vcf.gz snps_clean.vcf > snps_clean_clinvar.vcf
+```
 
-
-Our annotated file [(snps_clean_clinvar.vcf)]() contains clinical annotations (CLNDN) describing diseases or clinical traits. We will save it in separate file for further analysis, having this structure: Chromosome, Position, SNP ID (rsID), and clinical description (CLNDN).
+Our annotated file (snps_clean_clinvar.vcf) contains clinical annotations (CLNDN) describing diseases or clinical traits. We will save it in separate file for further analysis, having this structure: Chromosome, Position, SNP ID (rsID), and clinical description (CLNDN).   
 `grep -v "^#" snps_clean_clinvar.vcf | grep "CLNDN" | cut -f1,2,3,8 > clinically_relevant_snps.txt`
 
-There are a lot of "not provided" entries, so we will filter them and keep only informative one:
-`grep "CLNDN" snps_clean_clinvar.vcf | grep -v "not_provided" > clinically_relevant_snps_filtered.txt`
+There are a lot of "not provided" entries, so we will filter them and keep only informative one:   
+`grep "CLNDN" snps_clean_clinvar.vcf | grep -v "not_provided" > clinically_relevant_snps_filtered.txt`   
+
 GWAS Catalog helps associate SNPs with traits identified through Genome-Wide Association Studies:
 1. Download GWAS Catalog data:   
    `wget https://www.ebi.ac.uk/gwas/api/search/downloads/full -O gwas_catalog.tsv`
@@ -122,3 +163,47 @@ GWAS Catalog helps associate SNPs with traits identified through Genome-Wide Ass
    `java -jar SnpSift.jar gwasCat -db gwas_catalog.tsv snps_clean.vcf > snps_clean_gwascat.vcf`
 3. Extract interesting GWAS associations:    
    `grep -v "^#" snps_clean_gwascat.vcf | grep "GWASCAT_TRAIT" | cut -f1,2,3,8 > gwas_trait_associations.txt`
+
+Let us work a little with annotated output - [clinically_relevant_snps_filtered.txt]()
+
+In the VCF file, clinical significance of SNPs is indicated by the CLNSIG field in the INFO column:
+
+    Pathogenic – associated clearly with a disease.
+
+    Likely_pathogenic – likely associated.
+
+    Risk_factor – increases susceptibility to a disease.
+
+    Association – associated statistically with a condition.
+
+    Benign – not clinically relevant.
+
+We should extract SNPs explicitly marked as clinically significant:
+
+    Pathogenic
+
+    Likely_pathogenic
+
+    Risk_factor
+
+    Association
+
+With simple python [script](Clinical_snp.ipynb) we recieved this [output](clinically_relevant_snps.csv) with 19  clinically significant SNPs
+
+## Step 5. Genome editing plan
+
+We will look at one example of SNP here and provide table with 5 SNPs' edits in [LabReport](https://docs.google.com/document/d/1vkfhVK8wfpDMmIXQg0GRD4fa8KtQgi5trRayrzgPFq0/edit?tab=t.0).
+
+```
+Chromosome: 1
+Position: 31349647
+rsID: rs2491132
+REF (reference allele): C
+ALT (alternate allele): T
+Genotype: 0/1
+```
+ The alternate allele (T) is associated with "Obesity", so we'd like to reduce obesity risk. In that case, we would replace the alternate allele (T) with the reference allele (C) on the chromosome copy that has the risk variant. 
+
+## P.S. Pipeline with analyzing unique from both Genotek vcf + 23andMe data is representes in [eye_snp.ipynb]()
+
+The work was performed by Kochubei Lisa and Mikhaylov Roman
