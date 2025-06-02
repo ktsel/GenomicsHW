@@ -75,6 +75,9 @@ bwa index GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 
 Просмотр [аутпута](<report1gr_st_r.txt>) с помощью Pavian Tool - [здесь](<sankey-report1gr_st_r.txt.html>) 
 
+![Screenshot 2025-06-02 154618](https://github.com/user-attachments/assets/fe6007d5-1cba-43b7-b235-be9ab3d837c8)
+
+
 # Сборка с помощью megahit
 
 `megahit -1 trimm_1P.fastq.gz -2 trimm_2P.fastq.gz -t 60 -o megahit`
